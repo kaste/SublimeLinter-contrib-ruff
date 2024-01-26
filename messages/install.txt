@@ -1,6 +1,14 @@
-SublimeLinter-contrib-__linter__
--------------------------------
-This linter plugin for SublimeLinter provides an interface to __linter__.
+SublimeLinter-contrib-ruff
+--------------------------
+
+This linter plugin for SublimeLinter provides an interface to ruff.
+https://docs.astral.sh/ruff/   ***   https://github.com/astral-sh/ruff
+
+Ensure you have it, e.g.
+
+```
+pip install ruff
+```
 
 For more information, please see:
-https://github.com/__user__/SublimeLinter-contrib-__linter__
+https://github.com/kaste/SublimeLinter-contrib-ruff

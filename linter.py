@@ -7,7 +7,10 @@ import sublime
 
 from SublimeLinter.lint import LintMatch, PermanentError, PythonLinter
 from SublimeLinter.lint.quick_fix import (
-    TextRange, QuickAction, merge_actions_by_code_and_line, quick_actions_for)
+    TextRange, QuickAction, add_at_eol, ignore_rules_inline,
+    extend_existing_comment, line_error_is_on,
+    merge_actions_by_code_and_line, quick_actions_for,
+)
 
 packages_path = sublime.packages_path()
 
@@ -182,3 +185,32 @@ def ruff_fix_error(error, view) -> "Iterator[TextRange]":
             view.text_point(end_line, end_col)
         )
         yield TextRange(edit["content"], region)
+
+
+@ignore_rules_inline("ruff", except_for={
+    # some indentation rules are not stylistic in python
+    # the following violations cannot be ignored
+    "E112",  # expected an indented block
+    "E113",  # unexpected indentation
+    "E116",  # unexpected indentation (comment)
+    "E901",  # SyntaxError or IndentationError
+    "E902",  # IOError
+    "E999",  # SyntaxError
+    "F722",  # syntax error in forward annotation
+})
+def ignore_ruff_code(error, view):
+    # type: (LintError, sublime.View) -> Iterator[TextRange]
+    line = line_error_is_on(view, error)
+    code = error["code"]
+    yield (
+        extend_existing_comment(
+            r"(?i)# noqa:[\s]?(?P<codes>[A-Z]+[0-9]+((?:,\s?)[A-Z]+[0-9]+)*)",
+            ", ",
+            {code},
+            line
+        )
+        or add_at_eol(
+            "  # noqa: {}".format(code),
+            line
+        )
+    )

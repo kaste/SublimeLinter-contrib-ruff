@@ -2,7 +2,11 @@ import json
 import logging
 import os
 
+import sublime
+
 from SublimeLinter.lint import LintMatch, PermanentError, PythonLinter
+
+packages_path = sublime.packages_path()
 
 
 class Ruff(PythonLinter):
@@ -21,6 +25,22 @@ class Ruff(PythonLinter):
 
     def run(self, cmd, code):
         cwd = self.get_working_dir()
+        if (
+            self.context.get("file", "").startswith(packages_path)
+            and os.path.exists(os.path.join(cwd, "mypy.ini"))
+            and not os.path.exists(os.path.join(cwd, ".python-version"))
+        ):
+            self.logger.info(
+                "Skip ruff: no '.python-version' file found at '{}' "
+                "but mypy is configured. This can lead to false positives as "
+                "ruff does not read type comments."
+                .format(cwd)
+            )
+            self.notify_unassign()
+            raise PermanentError(
+                "assume file contains type comments that ruff does not read"
+            )
+
         if (
             self.settings.get("check_for_local_configuration")
             and cwd and not any(

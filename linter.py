@@ -71,8 +71,8 @@ class Ruff(PythonLinter):
         # stderr is noisy e.g.
         # error: Failed to parse at 155:15: Unexpected token 'QuickAction'
         # but these also appear well formatted on `stdout`
-        # if proc.stderr.strip():
-        #     self.on_stderr(proc.stderr)
+        if proc.stderr.strip() and not proc.stdout.strip():
+            self.on_stderr(proc.stderr)
 
         try:
             content = json.loads(proc.stdout)

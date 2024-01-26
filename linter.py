@@ -77,6 +77,10 @@ class Ruff(PythonLinter):
         if proc.stderr.strip() and not proc.stdout.strip():
             self.on_stderr(proc.stderr)
 
+        if not proc.stdout:
+            self.logger.info('{}: no output'.format(self.name))
+            return
+
         try:
             content = json.loads(proc.stdout)
         except ValueError:

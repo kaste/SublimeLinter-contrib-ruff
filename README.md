@@ -20,6 +20,19 @@ rye install ruff
 
 will do that.  You can also install it into a virtual environment and SublimeLinter will find it.
 
+## Quick Fixes
+
+`ruff` provides fixes for some errors.  These fixes are available in SublimeLinter as quick actions. See the Command Palette: `SublimeLinter: Quick Action`.  (Also: https://github.com/SublimeLinter/SublimeLinter#quick-actionsfixers)
+
+You may want to define a key binding:
+
+```
+    // To trigger a quick action
+    { "keys": ["ctrl+k", "ctrl+f"],
+      "command": "sublime_linter_quick_actions"
+    },
+```
+
 
 ## Settings
 - SublimeLinter settings: http://sublimelinter.readthedocs.org/en/latest/settings.html

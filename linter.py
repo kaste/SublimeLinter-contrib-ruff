@@ -1,3 +1,4 @@
+from functools import partial
 import json
 import logging
 import os
@@ -5,8 +6,18 @@ import os
 import sublime
 
 from SublimeLinter.lint import LintMatch, PermanentError, PythonLinter
+from SublimeLinter.lint.quick_fix import (
+    TextRange, QuickAction, merge_actions_by_code_and_line, quick_actions_for)
 
 packages_path = sublime.packages_path()
+
+
+MYPY = False
+if MYPY:
+    from typing import List, Iterator, Optional
+    from SublimeLinter.lint import util
+    from SublimeLinter.lint.linter import VirtualView
+    from SublimeLinter.lint.persist import LintError
 
 
 class Ruff(PythonLinter):
@@ -55,14 +66,21 @@ class Ruff(PythonLinter):
             raise PermanentError("no local configuration found")
         return super().run(cmd, code)
 
-    def find_errors(self, output):
+    def parse_output(self, proc, virtual_view):
+        # type: (util.popen_output, VirtualView) -> Iterator[LintError]
+        # stderr is noisy e.g.
+        # error: Failed to parse at 155:15: Unexpected token 'QuickAction'
+        # but these also appear well formatted on `stdout`
+        # if proc.stderr.strip():
+        #     self.on_stderr(proc.stderr)
+
         try:
-            content = json.loads(output)
+            content = json.loads(proc.stdout)
         except ValueError:
             self.logger.error(
                 "JSON Decode error: We expected JSON from 'ruff', "
                 "but instead got this:\n{}\n\n"
-                .format(output)
+                .format(proc.stdout)
             )
             self.notify_failure()
             return
@@ -92,17 +110,75 @@ class Ruff(PythonLinter):
           }
         """
 
-        for match in content:
-            code = match["code"]
-            yield LintMatch(
-                match=match,
-                filename=match["filename"],
-                line=match["location"]["row"] - 1,
-                col=match["location"]["column"] - 1,
-                end_line=match["end_location"]["row"] - 1,
-                end_col=match["end_location"]["column"] - 1,
+        for item in content:
+            code = item["code"]
+            match = LintMatch(
+                match=item,
+                filename=item["filename"],
+                line=item["location"]["row"] - 1,
+                col=item["location"]["column"] - 1,
+                end_line=item["end_location"]["row"] - 1,
+                end_col=item["end_location"]["column"] - 1,
                 error_type="error" if code.startswith("F") else "warning",
                 code=code,
-                message=match["message"],
-
+                message=item["message"],
             )
+            error = self.process_match(match, virtual_view)
+            if error:
+                try:
+                    fix_description = item["fix"]
+                except KeyError:
+                    pass
+                else:
+                    if fix_description:
+                        error["fix"] = fix_description
+                yield error
+
+
+@quick_actions_for("ruff")
+def ruff_fixes_provider(errors, _view):
+    # type: (List[LintError], Optional[sublime.View]) -> Iterator[QuickAction]
+    def make_action(error):
+        # type: (LintError) -> QuickAction
+        return QuickAction(
+            "ruff: {fix[message]}".format(**error),
+            partial(ruff_fix_error, error),
+            "{msg}".format(**error),
+            solves=[error]
+        )
+
+    except_ = lambda error: "fix" not in error
+    yield from merge_actions_by_code_and_line(make_action, except_, errors, _view)
+
+
+def ruff_fix_error(error, view) -> "Iterator[TextRange]":
+    """
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "...",
+          "end_location": {
+            "column": 1,
+            "row": 26
+          },
+          "location": {
+            "column": 1,
+            "row": 1
+          }
+        }
+      ],
+      "message": "Organize imports"
+    },
+    """
+    fix_description = error["fix"]
+    for edit in fix_description["edits"]:
+        line = edit["location"]["row"] - 1
+        col = edit["location"]["column"] - 1
+        end_line = edit["end_location"]["row"] - 1
+        end_col = edit["end_location"]["column"] - 1
+        region = sublime.Region(
+            view.text_point(line, col),
+            view.text_point(end_line, end_col)
+        )
+        yield TextRange(edit["content"], region)

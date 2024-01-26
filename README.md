@@ -1,8 +1,6 @@
 SublimeLinter-contrib-ruff
 ==========================
 
-[![Build Status](https://travis-ci.org/SublimeLinter/SublimeLinter-contrib-ruff.svg?branch=master)](https://travis-ci.org/SublimeLinter/SublimeLinter-contrib-ruff)
-
 This linter plugin for [SublimeLinter](https://github.com/SublimeLinter/SublimeLinter) provides an interface to [ruff](https://docs.astral.sh/ruff/). It will be used with files that have the “Python” syntax.
 
 ## Installation

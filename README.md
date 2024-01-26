@@ -24,6 +24,8 @@ will do that.  You can also install it into a virtual environment and SublimeLin
 
 `ruff` provides fixes for some errors.  These fixes are available in SublimeLinter as quick actions. See the Command Palette: `SublimeLinter: Quick Action`.  (Also: https://github.com/SublimeLinter/SublimeLinter#quick-actionsfixers)
 
+![image](https://github.com/kaste/SublimeLinter-contrib-ruff/assets/8558/5dd3507a-4b30-442d-ace2-c5840c13d454)
+
 You may want to define a key binding:
 
 ```

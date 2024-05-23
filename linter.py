@@ -24,13 +24,14 @@ if MYPY:
 
 
 class Ruff(PythonLinter):
-    cmd = 'ruff check --output-format=json -'
+    cmd = 'ruff check --output-format=json ${args} -'
     regex = None
     defaults = {
         "selector": "source.python",
         # As we run automatically everywhere, turn off the cache to
         # not create a temp-file-mess.
         "--no-cache": True,
+        "--stdin-filename": "$file",
         # Check for "ruff.toml" and ".ruff.toml" configuration files
         # and skip linting otherwise.
         "check_for_local_configuration": False,

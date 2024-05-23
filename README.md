@@ -42,9 +42,9 @@ Additional SublimeLinter-ruff settings:
 
 |Setting|Description    |
 |:------|:--------------|
-|no-cache                  |Default: `True`.  As this plugin by default runs on every python file, turn the cache off.  `ruff` is already fast without a cache but turn this back on (`false`) on projects.|
+|no-cache                  |Default: `True`.  Turn the cache off as this plugin runs on every python file by default.  `ruff` is probably fast enough without a cache but you may turn this back "on" (`false`) on projects.|
 |disable_if_not_dependency |Default: `False`.  If set to `true`, use only locally installed `ruff` executables from virtual environments or skip linting the project.
-|check_for_local_configuration |Set to `true` to check for a local "ruff.toml" configuration file. Skip running ruff if such a file cannot be found.[1]|
+|check_for_local_configuration |Default: `False`. Set to `true` to check for a local "ruff.toml" configuration file. Skip running ruff if such a file cannot be found.[1]|
 
 
 [1] Unfortunately "pyproject.toml" detection is not implemented as we don't have a toml parser at hand in Python 3.3 (yik, we run 3.3 here). (TODO?)

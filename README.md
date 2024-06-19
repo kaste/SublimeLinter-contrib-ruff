@@ -47,5 +47,5 @@ Additional SublimeLinter-ruff settings:
 |check_for_local_configuration |Default: `False`. Set to `true` to check for a local "ruff.toml" configuration file. Skip running ruff if such a file cannot be found.[1]|
 
 
-[1] Unfortunately "pyproject.toml" detection is not implemented as we don't have a toml parser at hand in Python 3.3 (yik, we run 3.3 here). (TODO?)
+[1] "pyproject.toml" detection is not implemented (yet?).
 

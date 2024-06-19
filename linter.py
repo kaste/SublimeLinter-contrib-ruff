@@ -24,7 +24,7 @@ if MYPY:
 
 
 class Ruff(PythonLinter):
-    cmd = 'ruff check --output-format=json ${args} -'
+    cmd = 'ruff check --output-format=json --no-fix ${args} -'
     regex = None
     defaults = {
         "selector": "source.python",

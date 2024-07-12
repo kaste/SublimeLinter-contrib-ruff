@@ -127,7 +127,10 @@ class Ruff(PythonLinter):
                 col=item["location"]["column"] - 1,
                 end_line=item["end_location"]["row"] - 1,
                 end_col=item["end_location"]["column"] - 1,
-                error_type="error" if code.startswith("F") else "warning",
+                error_type=(
+                    "error" if code is None or code.startswith("F")
+                    else "warning"
+                ),
                 code=code,
                 message=item["message"],
             )

@@ -128,7 +128,11 @@ class Ruff(PythonLinter):
                 end_line=item["end_location"]["row"] - 1,
                 end_col=item["end_location"]["column"] - 1,
                 error_type=(
-                    "error" if code is None or code.startswith("F")
+                    "error" if (
+                        code is None
+                        or code == "invalid-syntax"
+                        or code.startswith("F")
+                    )
                     else "warning"
                 ),
                 code=code,
@@ -205,6 +209,7 @@ def ruff_fix_error(error, view) -> "Iterator[TextRange]":
     "E902",  # IOError
     "E999",  # SyntaxError
     "F722",  # syntax error in forward annotation
+    "invalid-syntax",  # SyntaxError, as reported by newer ruff
 })
 def ignore_ruff_code(error, view):
     # type: (LintError, sublime.View) -> Iterator[TextRange]
